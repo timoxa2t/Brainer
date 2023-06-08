@@ -1,13 +1,12 @@
 import * as THREE from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrangeStandartMaterial, setMaterial } from '../utils/materials';
-import { Point } from '../types/Point';
-import { initial } from 'lodash';
+
 
 export enum BrainType {
   Orange,
   Violet,
-  Red,
+  Blue,
 }
 
 export class Brain {
@@ -17,7 +16,7 @@ export class Brain {
   initialDistanse: number;
 
   constructor(scene: GLTF, type: BrainType, distanse: number, row: number) {
-    this.mesh = scene.scene.clone();
+    this.mesh = scene.scene.clone() as unknown as THREE.Mesh;
     this.mesh.castShadow = true;
     this.mesh.position.y = 2;
     this.type = type;
@@ -30,8 +29,8 @@ export class Brain {
       case BrainType.Violet:
         setMaterial(this.mesh, new THREE.MeshStandardMaterial({ color: 0x7f00ff }));
         break;
-      case BrainType.Red:
-        setMaterial(this.mesh, new THREE.MeshStandardMaterial({ color: 0xdf0000 }));
+      case BrainType.Blue:
+        setMaterial(this.mesh, new THREE.MeshStandardMaterial({ color: 0x0096ff }));
         break;
       default:
         setMaterial(this.mesh, OrangeStandartMaterial);

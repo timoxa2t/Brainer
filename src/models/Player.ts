@@ -17,12 +17,12 @@ export class Player {
   
 
   constructor(scene: GLTF) {
-    this.mesh = scene.scene;
+    this.mesh = scene.scene as unknown as THREE.Mesh;
     setMaterial(this.mesh, OrangeStandartMaterial);
     this.mesh.castShadow = true;
     this.mesh.rotation.y = Math.PI;
 
-    this.scoreBoard = scene.scene.children[0].children[0];
+    this.scoreBoard = scene.scene.children[0].children[0] as unknown as THREE.Mesh;
 
     this.animations = scene.animations;
     this.animation = new THREE.AnimationMixer(this.mesh);

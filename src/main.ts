@@ -4,15 +4,21 @@ import './style.css';
 import { Star } from './models/Star';
 import { checkColision, getRandomPosition, randomEnum } from './utils/helpers';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Player } from './models/Player';
 import { Brain, BrainType } from './models/Brain';
+
+const production = process.env.NODE_ENV === 'production';
+const filesLocation = production
+  ? '../Brainer/threejs_tz'
+  : '../public/threejs_tz'
 
 let isPlaying = false;
 let touchstartX = 0
 let touchendX = 0
 
 const scene = new THREE.Scene();
+const texture = new THREE.TextureLoader().load(`${filesLocation}/CachedImage_2560_1440_POS2.jpg`);
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
 camera.position.x = 6;
@@ -33,28 +39,36 @@ document.body.appendChild( renderer.domElement );
 const light = new THREE.PointLight(0xffffff, 1);
 light.castShadow = true;
 light.position.z = 5;
-light.position.x = 2;
-light.position.y = 20;
+light.position.x = 20;
+light.position.y = 10;
 scene.add(light);
 
 addTitle();
 const pointerMixer = addPointer();
 
+//creates Space Background
+const geometry = new THREE.SphereGeometry( 500, 32, 16 ); //creates spherical geometry with radius 500, 32 horizontal segments and 16 vertical segments
+const material = new THREE.MeshBasicMaterial( { map: texture, side: THREE.BackSide } ); //pastes the picture on the spherical geometry.
+const sphere = new THREE.Mesh( geometry, material ); //creates sphere from spherical geometry and texture
+sphere.rotation.y = 1;
+scene.add( sphere ); //displays this another sphere
+
 const loader = new GLTFLoader();
 
 let player: Player;
 let brains: Brain[] = [];
+let floor: THREE.Mesh;
 
-loader.load( '../src/threejs_tz/Stickman.glb', ( gltf ) =>
+loader.load( `${filesLocation}/Stickman.glb`, ( gltf ) =>
 {
   player = new Player(gltf);
 
   scene.add(player.mesh)
 });
 
-loader.load( '../src/threejs_tz/TrackFloor.glb', function ( gltf )
+loader.load( `${filesLocation}/TrackFloor.glb`, function ( gltf )
 {
-  const floor = gltf.scene;
+  floor = gltf.scene as unknown as THREE.Mesh;
   floor.position.z += 20;
   floor.receiveShadow = true;
 
@@ -62,7 +76,7 @@ loader.load( '../src/threejs_tz/TrackFloor.glb', function ( gltf )
   scene.add(floor)
 } );
 
-loader.load( '../src/threejs_tz/Brain.glb', function ( gltf )
+loader.load( `${filesLocation}/Brain.glb`, function ( gltf )
 {
   for (let i = 0; i < 50; i++) {
     let distanse = 50 + Math.round(Math.random() * 50) * 3;
@@ -151,7 +165,9 @@ function play(delta: number) {
     } else {
       player.run();
     }
-    
+
+    floor.position.z = player.mesh.position.z + 50;
+    sphere.position.z = player.mesh.position.z;
 
     if (player.animation !== undefined) {
       player.animation.update(delta);
@@ -162,7 +178,7 @@ function play(delta: number) {
   }
 }
 
-function adjustCameraTo(object: THREE.Group) {
+function adjustCameraTo(object: THREE.Mesh) {
   camera.position.z = object.position.z + 10;
 
   camera.position.x = object.position.x;
@@ -182,15 +198,15 @@ function adjustCameraTo(object: THREE.Group) {
   // } 
 }
 
-function adjustLightTo(object: THREE.Group) {
+function adjustLightTo(object: THREE.Mesh) {
   light.position.z = object.position.z + 5;
-  light.position.x = object.position.x + 2;
+  light.position.x = object.position.x + 15;
   light.position.y = object.position.y + 20;
 }
 
 function addTitle() {
   const textureLoader = new THREE.TextureLoader();
-  const texture = textureLoader.load('../src/threejs_tz/Tutorial_SWIPE TO START.png');
+  const texture = textureLoader.load(`${filesLocation}/Tutorial_SWIPE TO START.png`);
 
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 1),
@@ -224,7 +240,7 @@ function addPointer() {
 
 
   const textureLoader = new THREE.TextureLoader();
-  const texture = textureLoader.load('../src/threejs_tz/Tutorial_Hand.png');
+  const texture = textureLoader.load(`${filesLocation}/Tutorial_Hand.png`);
 
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),

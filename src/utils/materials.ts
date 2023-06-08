@@ -5,7 +5,7 @@ export const OrangeStandartMaterial
 
 export function setMaterial(mesh: THREE.Mesh, material: THREE.Material) {
   mesh.traverse((node) => {
-    if (node.isMesh) {
+    if (node instanceof THREE.Mesh) {
       node.material = material;
     }
   })
